@@ -31,18 +31,6 @@ jobs:
         working-directory: ${{ inputs.environment }}
 
     steps:
-      - name: Set Directory
-        id: vars
-        run: |
-          ENV="${{ inputs.environment }}"
-          if [ "$ENV" = "development" ]; then
-            echo "dir=Development" >> "$GITHUB_OUTPUT"
-          elif [ "$ENV" = "staging" ]; then
-            echo "dir=Staging" >> "$GITHUB_OUTPUT"
-          else
-            echo "dir=Production" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
