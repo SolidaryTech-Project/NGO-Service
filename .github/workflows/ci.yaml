@@ -25,10 +25,10 @@ jobs:
   build-test-security:
     name: Build + Tests
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment == 'staging' && 'Staging' || 'Production' }}
+    environment: ${{ inputs.environment == 'development' && 'Development' || (inputs.environment == 'staging' && 'Staging' || 'Production') }}
     defaults:
       run:
-        working-directory: ${{ inputs.environment == 'staging' && 'Staging' || 'Production' }}
+        working-directory: ${{ inputs.environment == 'development' && 'Development' || (inputs.environment == 'staging' && 'Staging' || 'Production') }}
 
     steps:
       - name: Set Directory
@@ -178,7 +178,7 @@ jobs:
   gitops:
     name: Update GitOps Manifests
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment == 'staging' && 'Staging' || 'Production' }}
+    environment: ${{ inputs.environment == 'development' && 'Development' || (inputs.environment == 'staging' && 'Staging' || 'Production') }}
     needs: docker
 
     steps:
