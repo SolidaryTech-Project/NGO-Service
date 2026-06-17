@@ -25,10 +25,10 @@ jobs:
   build-test-security:
     name: Build + Tests
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment == 'development' && 'Development' || (inputs.environment == 'staging' && 'Staging' || 'Production') }}
+    environment: ${{ inputs.environment }}
     defaults:
       run:
-        working-directory: ${{ inputs.environment == 'development' && 'Development' || (inputs.environment == 'staging' && 'Staging' || 'Production') }}
+        working-directory: ${{ inputs.environment }}
 
     steps:
       - name: Set Directory
@@ -89,7 +89,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: 'fs'
-          scan-ref: ${{ steps.vars.outputs.dir }}
+          scan-ref: ${{ inputs.environment }}
           severity: 'CRITICAL'
           exit-code: '1'
 
@@ -108,11 +108,11 @@ jobs:
   docker:
     name: Docker Build + Container Scan
     runs-on: ubuntu-latest
-    environment: ${{ steps.vars.outputs.dir }}
+    environment: ${{ inputs.environment }}
     needs: build-test-security
     defaults:
       run:
-        working-directory: ${{ steps.vars.outputs.dir }}
+        working-directory: ${{ inputs.environment }}
 
     steps:
       - name: Checkout
@@ -178,7 +178,7 @@ jobs:
   gitops:
     name: Update GitOps Manifests
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment == 'development' && 'Development' || (inputs.environment == 'staging' && 'Staging' || 'Production') }}
+    environment: ${{ inputs.environment }}
     needs: docker
 
     steps:
@@ -197,8 +197,8 @@ jobs:
       - name: Update image tag
         run: |
           COMMIT_HASH=${GITHUB_SHA::7}
-          FILE_PATH="${{ env.WORKDIR }}/Helm/${{ env.SERVICE_NAME }}/values.yaml"
-          NEW_IMAGE="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.SERVICE_NAME }}:${{ env.ENVIRONMENT }}-$COMMIT_HASH"
+          FILE_PATH="${{ inputs.environment }}/Helm/${{ env.SERVICE_NAME }}/values.yaml"
+          NEW_IMAGE="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.SERVICE_NAME }}:${{ inputs.environment }}-$COMMIT_HASH"
 
           echo "Updating $FILE_PATH to image: $NEW_IMAGE"
 
@@ -216,7 +216,7 @@ jobs:
       - name: Commit and Push changes
         run: |
           COMMIT_HASH=${GITHUB_SHA::7}
-          FILE_PATH="${{ env.WORKDIR }}/Helm/${{ env.SERVICE_NAME }}/values.yaml"
+          FILE_PATH="${{ inputs.environment }}/Helm/${{ env.SERVICE_NAME }}/values.yaml"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -228,5 +228,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Update ${{ env.SERVICE_NAME }} image (${{ env.ENVIRONMENT }}) to $COMMIT_HASH [skip ci]"
+          git commit -m "Update ${{ env.SERVICE_NAME }} image (${{ inputs.environment }}) to $COMMIT_HASH [skip ci]"
           git push origin HEAD:${GITHUB_REF_NAME}
