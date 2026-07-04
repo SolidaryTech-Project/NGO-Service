@@ -44,7 +44,8 @@ def create_ngo():
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(
-                "INSERT INTO ngos (name, email, cause, city) VALUES (%s, %s, %s, %s) RETURNING *",
+                "INSERT INTO ngos (name, email, cause, city)"
+                " VALUES (%s, %s, %s, %s) RETURNING *",
                 (data["name"], data["email"], data["cause"], data["city"]),
             )
             new_ngo = cur.fetchone()
