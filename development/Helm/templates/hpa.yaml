@@ -1,0 +1,27 @@
+{{- if (index .Values "ngo-service").autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ngo-service-hpa
+  namespace: {{ (index .Values "ngo-service").namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: app-ngo-service
+  minReplicas: {{ (index .Values "ngo-service").autoscaling.minReplicas }}
+  maxReplicas: {{ (index .Values "ngo-service").autoscaling.maxReplicas }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ (index .Values "ngo-service").autoscaling.targetCPUUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ (index .Values "ngo-service").autoscaling.targetMemoryUtilizationPercentage }}
+{{- end }}
