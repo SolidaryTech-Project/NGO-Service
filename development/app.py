@@ -18,8 +18,17 @@ app = Flask(__name__)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    log.critical("Erro: DATABASE_URL não definida.")
-    sys.exit(1)
+    user = os.getenv("POSTGRES_USER")
+    password = os.getenv("POSTGRES_PASSWORD")
+    host = os.getenv("POSTGRES_HOST")
+    port = os.getenv("POSTGRES_PORT")
+    dbname = os.getenv("POSTGRES_DB")
+
+    if not all([user, password, host, port, dbname]):
+        log.critical("Erro: DATABASE_URL não definida.")
+        sys.exit(1)
+
+    DATABASE_URL = f"postgresql://{user}:{password}@{host}:{port}/{dbname}"
 
 try:
     pool = SimpleConnectionPool(1, 10, dsn=DATABASE_URL)
