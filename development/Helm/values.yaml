@@ -1,7 +1,7 @@
 ngo-service:
   replicas: 1
   namespace: ngo-service
-  image: 778900740186.dkr.ecr.us-east-1.amazonaws.com/ngo-service:development-7b4ed63
+  image: 778900740186.dkr.ecr.us-east-1.amazonaws.com/ngo-service:development-58484f4
   imagePullPolicy: IfNotPresent
   port: 8081
   imagePullSecrets:
